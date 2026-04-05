@@ -1,12 +1,12 @@
 # Agent Skills
 
-Reusable agent skills for Claude Code and Codex.
+A growing catalog of open-source skills for Claude Code and Codex. Each skill encodes a real developer workflow so your agent can run it reliably — without you writing the logic from scratch every time.
 
 ## Skills
 
 ### [ship](skills/ship/SKILL.md)
 
-A release workflow that takes a branch from "done coding" to "reviewed, committed, pushed, and PR-ready."
+Takes a branch from "done coding" to "reviewed, committed, pushed, and PR-ready."
 
 What it does:
 
@@ -28,7 +28,7 @@ npx skills add ragnos-labs/agent-skills --skill ship
 Pin to a release:
 
 ```bash
-npx skills add ragnos-labs/agent-skills@v0.0.1 --skill ship
+npx skills add ragnos-labs/agent-skills@v0.1.2 --skill ship
 ```
 
 ## Adapting to your repo
