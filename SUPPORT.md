@@ -31,3 +31,11 @@ For workflow questions, include:
 - We aim to keep the repo welcoming and responsive.
 - We do not guarantee SLA-based support for the public repo.
 - Maintainers may redirect broad roadmap ideas into Discussions before turning them into issues.
+
+## Follow Along
+
+New skills and updates are announced on:
+
+- X: [@mrcommandline](https://x.com/mrcommandline)
+- Substack: [substack.com/@mrcommandline](https://substack.com/@mrcommandline)
+- Website: [ragnos.io](https://ragnos.io)

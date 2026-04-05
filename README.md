@@ -48,3 +48,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the forking checklist.
 - Questions and discussion: [GitHub Discussions](../../discussions)
 - Bugs: [open an issue](../../issues)
 - Security: [SECURITY.md](SECURITY.md)
+
+---
+
+Built by [RAGnos Labs](https://ragnos.io) · [X](https://x.com/mrcommandline) · [Substack](https://substack.com/@mrcommandline)
