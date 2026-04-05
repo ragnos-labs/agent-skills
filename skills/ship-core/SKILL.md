@@ -6,7 +6,7 @@ metadata: {"ragnos":{"featured":true,"supportedAgents":["codex","claude-code"],"
 
 # Ship Core
 
-`ship-core` is the runtime-neutral contract for taking a branch from "done coding" to "reviewed, validated, pushed, and release-ready."
+`ship-core` is the runtime-neutral skill for taking a branch from "done coding" to "reviewed, validated, pushed, and release-ready."
 
 It is intentionally public-safe:
 
@@ -16,6 +16,12 @@ It is intentionally public-safe:
 - no hidden merge policy.
 
 Use this skill through an adapter such as `ship-codex` or `ship-claude`.
+
+Optional helper resources live in `scripts/` and `references/`.
+
+- `scripts/` are optional support files for repos that want deterministic setup or gating.
+- `references/` hold the config contract, examples, findings format, and troubleshooting notes.
+- If a repo does not use the helper scripts, the skill still works as a markdown workflow.
 
 ## When To Use
 
@@ -34,6 +40,17 @@ Use `ship-core` when the user wants to:
 - Review findings are not silently deferred.
 - Never merge without explicit user instruction.
 - Release notes should point users to tags or releases, not to `main`.
+
+## Recommended Startup
+
+For a repo that does not already have a clear hook map:
+
+1. Read `references/config-file.md`.
+2. Generate a starter config with `python3 skills/ship-core/scripts/ship_init.py --write ship.yaml`.
+3. Validate it with `python3 skills/ship-core/scripts/ship_validate_config.py --config ship.yaml`.
+4. Use the generated file as the source of truth for commands and policy.
+
+If the host repo already has a strong workflow contract, you can skip the helper scripts and map the hooks directly from repo docs.
 
 ## Public Flags
 
@@ -152,6 +169,8 @@ Public `ship-core` assumes you will map these hooks to your own repo:
 | `publish` | Push, PR creation, tag, and release handling |
 
 See `references/extension-hooks.md` for a portable mapping checklist.
+See `references/config-file.md` for a concrete `ship.yaml` schema.
+See `references/findings-format.md` for the public finding shape.
 
 ## Rerun Model
 
@@ -162,6 +181,13 @@ Use prior ship state only to save time, not to lower quality.
 - `full`: no trustworthy prior state, or the change is large enough that full review is cheaper than guessing
 
 Security-critical validation should be treated as fresh unless the host repo has a strong reason to trust caching.
+
+## Gotchas
+
+- Do not invent repo commands. Read them from `ship.yaml` or repo docs.
+- Do not stage unrelated files just because a formatter touched them.
+- Treat missing scanner binaries as `WARN` unless the config marks them required.
+- Keep the final report short and structured; use `BLOCK`, `WARN`, and `NOTE` consistently.
 
 ## What Stays Private
 

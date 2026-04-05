@@ -2,7 +2,9 @@
 
 Thanks for contributing.
 
-This repo is intentionally narrow at launch. We are proving a GitHub-first public catalog around one workflow family before broadening the surface area.
+This repo currently focuses on the `ship` family.
+
+Contributions should make the skill easier to use in real repos, not broaden it with extra positioning or repo-specific assumptions.
 
 ## Contribution Priorities
 
@@ -14,7 +16,7 @@ We are most likely to accept:
 - examples that make the public contract easier to adopt,
 - docs that remove private RAGnos assumptions.
 
-We are less likely to accept in the first phase:
+We are less likely to accept:
 
 - new skill families unrelated to `ship`,
 - private stack assumptions presented as defaults,
@@ -59,6 +61,8 @@ If you change JSON or workflow files, validate those as well before you open a P
 - Keep skill docs concise and operational.
 - Prefer extension hooks over repo-specific assumptions.
 - Keep the public baseline useful without private services.
+- Write for developers who may fork the skill and wire it into a different stack.
+- Avoid marketing language. Prefer concrete instructions, prerequisites, and examples.
 
 ## Pull Requests
 

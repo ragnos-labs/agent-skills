@@ -18,5 +18,11 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Install test dependencies
+        run: python3 -m pip install pyyaml
+
       - name: Validate catalog
         run: python3 scripts/validate_catalog.py
+
+      - name: Run ship runtime tests
+        run: python3 -m unittest discover -s tests -p 'test_*.py'

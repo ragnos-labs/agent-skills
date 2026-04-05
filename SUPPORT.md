@@ -1,6 +1,6 @@
 # Support
 
-Use the right channel so maintainers can respond efficiently.
+Use the right channel for the type of problem.
 
 ## Where To Go
 

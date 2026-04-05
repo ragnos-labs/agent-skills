@@ -48,7 +48,7 @@ npm run docs:check
 # publish
 git push -u origin HEAD
 gh pr create --fill
-gh release create v0.1.0 --notes-file release-notes/v0.1.0.md
+gh release create v0.0.1 --notes-file release-notes/v0.0.1.md
 ```
 
 ## What Not To Bake In

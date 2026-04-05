@@ -10,6 +10,8 @@ metadata: {"ragnos":{"featured":true,"supportedAgents":["claude-code"],"status":
 
 Read `../ship-core/SKILL.md` first for the shared workflow. This adapter adds Claude Code-specific execution notes and keeps the repo-specific commands replaceable.
 
+If the repo uses `ship.yaml`, treat that file as the operational source of truth. The helper scripts are optional support files, not mandatory infrastructure.
+
 ## When To Use
 
 Use this skill when a Claude Code user wants to:
@@ -32,6 +34,7 @@ Use this skill when a Claude Code user wants to:
 - inspect the branch,
 - identify changed files,
 - locate repo contribution, release, or validation docs,
+- prefer `ship.yaml` if it exists,
 - map the `ship-core` hooks to local commands.
 
 ### 2. Run Parallel Tracks When Safe

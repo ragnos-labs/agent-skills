@@ -1,0 +1,8 @@
+rules:
+  - rule_id: sample-shell-fp
+    pattern: shell injection
+    scope: scripts/**
+    severity_filter:
+      - WARN
+    reason: Example suppression for a known false positive
+    expires_at: 2099-01-01

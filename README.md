@@ -1,14 +1,14 @@
 # RAGnos Labs Agent Skills
 
-Public, GitHub-first agent skills from RAGnos Labs.
+Installable skills for coding agents.
 
-This repo launches the public `ship` family first:
+Current contents:
 
 - `ship-core` defines the shared workflow contract.
 - `ship-codex` adapts that contract for Codex.
 - `ship-claude` adapts that contract for Claude Code.
 
-If you want a reusable "review, commit, push, release" workflow for coding agents without inheriting our private stack, start here.
+If you want an agent to take a branch from "done coding" to "reviewed, validated, pushed, and PR-ready", start here.
 
 ## Install
 
@@ -21,34 +21,64 @@ npx skills add ragnos-labs/agent-skills --skill ship-core --skill ship-claude -a
 
 Install from a direct skill path:
 
+Codex:
+
 ```bash
 npx skills add https://github.com/ragnos-labs/agent-skills/tree/main/skills/ship-core
 npx skills add https://github.com/ragnos-labs/agent-skills/tree/main/skills/ship-codex
+```
+
+Claude Code:
+
+```bash
 npx skills add https://github.com/ragnos-labs/agent-skills/tree/main/skills/ship-core
 npx skills add https://github.com/ragnos-labs/agent-skills/tree/main/skills/ship-claude
 ```
 
 Use tags and releases for stable installs when possible:
 
+Codex:
+
 ```bash
-npx skills add https://github.com/ragnos-labs/agent-skills/tree/v0.1.0/skills/ship-core
-npx skills add https://github.com/ragnos-labs/agent-skills/tree/v0.1.0/skills/ship-codex
-npx skills add https://github.com/ragnos-labs/agent-skills/tree/v0.1.0/skills/ship-core
-npx skills add https://github.com/ragnos-labs/agent-skills/tree/v0.1.0/skills/ship-claude
+npx skills add https://github.com/ragnos-labs/agent-skills/tree/v0.0.1/skills/ship-core
+npx skills add https://github.com/ragnos-labs/agent-skills/tree/v0.0.1/skills/ship-codex
 ```
 
-## What This Repo Is For
+Claude Code:
 
-The public goal is not "every skill we use internally."
+```bash
+npx skills add https://github.com/ragnos-labs/agent-skills/tree/v0.0.1/skills/ship-core
+npx skills add https://github.com/ragnos-labs/agent-skills/tree/v0.0.1/skills/ship-claude
+```
 
-The goal is a small, credible catalog of agent skills that:
+## What `ship` Does
 
-- solve a real developer workflow problem,
-- work across multiple agents,
-- stay useful without RAGnos-private infrastructure,
-- ship like open source software instead of like an internal memo.
+`ship` gives an agent a repeatable workflow for:
 
-For the first release, that means one flagship workflow only: `ship`.
+- inspecting the current branch,
+- running preflight checks,
+- reviewing the actual diff,
+- fixing blockers before publish,
+- staging only intended files,
+- committing, pushing, and opening a PR when requested,
+- reporting what ran and what is still risky.
+
+The shared contract lives in `ship-core`. The agent-specific behavior lives in the Codex and Claude adapters.
+
+The skill itself is still the markdown in each `SKILL.md`.
+
+`ship-core/scripts/` contains optional helper resources that the skill can call when a repo wants a more deterministic config, prepare, gate, findings, commit, or publish step. They are support files for the skill, not a separate product.
+
+## What You Need In Your Repo
+
+`ship` is useful when the target repo already has:
+
+- at least one working validation command,
+- a clear publish path,
+- git remote access already configured for the agent,
+- repo-local docs or release rules that the agent can read.
+
+It is not a replacement for your repo's own lint, test, release, or merge automation.
 
 ## Fast Start
 
@@ -56,15 +86,33 @@ For the first release, that means one flagship workflow only: `ship`.
 
 1. Install `ship-core` and `ship-codex`.
 2. Open a repo that already has a working test or validation command.
-3. Tell Codex to ship the current branch or prepare a PR.
-4. Map the core extension hooks to your repo's actual lint, test, docs, and release commands.
+3. Optionally generate a starter config with `python3 skills/ship-core/scripts/ship_init.py --write ship.yaml`.
+4. Tell Codex to ship the current branch or prepare a PR.
+5. Map the core extension hooks to your repo's actual lint, test, docs, and release commands.
 
 ### Claude Code
 
 1. Install `ship-core` and `ship-claude`.
 2. Open a repo with a defined validation and publishing path.
-3. Ask Claude Code to ship the branch or prepare a reviewed PR.
-4. Bind the adapter to your repo's own commands rather than copying ours.
+3. Optionally generate a starter config with `python3 skills/ship-core/scripts/ship_init.py --write ship.yaml`.
+4. Ask Claude Code to ship the branch or prepare a reviewed PR.
+5. Bind the adapter to your repo's own commands rather than copying ours.
+
+## Hook Map
+
+Before you rely on `ship`, make sure the agent can answer these hook questions for the target repo:
+
+| Hook | Question |
+|------|----------|
+| `preflight` | What is the blocking validation baseline before review? |
+| `docs_sync` | Which docs or examples need to stay in sync with the change? |
+| `review` | What files or risk areas need semantic review? |
+| `tests` | Which tests are required for confidence? |
+| `gate` | What determines go, warn, or block after commit? |
+| `publish` | How should the branch be pushed, proposed, tagged, or released? |
+
+See [skills/ship-core/references/extension-hooks.md](skills/ship-core/references/extension-hooks.md) for the full mapping checklist.
+See [skills/ship-core/references/config-file.md](skills/ship-core/references/config-file.md) for the public `ship.yaml` contract.
 
 ## Architecture
 
@@ -86,6 +134,7 @@ For the first release, that means one flagship workflow only: `ship`.
 ├── skills/
 │   ├── ship-core/
 │   │   ├── SKILL.md
+│   │   ├── scripts/
 │   │   └── references/
 │   ├── ship-codex/
 │   │   ├── SKILL.md
@@ -96,10 +145,14 @@ For the first release, that means one flagship workflow only: `ship`.
 └── .github/
 ```
 
-## Maintainers
+## Current Limits
 
-- Hunter Canning, creator and public distribution lead under the Mr. CLI voice
-- RAGnos Labs, repo owner and release maintainer
+- Repo-specific automation is still your responsibility.
+- No branch naming policy is enforced.
+- No internal services are assumed.
+- Quality depends on how clearly the target repo defines validation and publish commands.
+- The adapters are intentionally thin. Most behavior lives in `ship-core`.
+- The helper scripts are optional. The skill still works as a markdown workflow without them.
 
 ## Contributing
 
@@ -124,21 +177,6 @@ The short version:
 
 Releases are the stable versioning surface for this repo.
 
-Each release notes file includes:
+Use tagged installs instead of `main` when you want stable behavior.
 
-- the exact install commands for Codex and Claude Code,
-- the skills included in the release,
-- any adapter contract changes that may require user action.
-
-## Why GitHub First
-
-For the first 90 days, this project is optimizing for:
-
-- stars,
-- watches,
-- follows,
-- installs,
-- Discussions,
-- outside issues and pull requests.
-
-The canonical home is this GitHub repo. Any website or social page should point back here rather than competing with it.
+The current baseline is `v0.0.1`. Keep treating it as an early contract while the workflow and docs are being tightened.

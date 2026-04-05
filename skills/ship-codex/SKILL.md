@@ -10,6 +10,8 @@ metadata: {"ragnos":{"featured":true,"supportedAgents":["codex"],"status":"activ
 
 Read `../ship-core/SKILL.md` first for the shared workflow contract. This adapter only adds Codex-specific execution guidance.
 
+If the repo uses `ship.yaml`, treat that file as the operational source of truth. Use the helper scripts only when they reduce ambiguity or make the run more deterministic.
+
 ## When To Use
 
 Use this skill when a Codex user wants to:
@@ -33,6 +35,7 @@ Use this skill when a Codex user wants to:
 - read git status,
 - read the diff,
 - find the repo's validation and publish commands,
+- prefer `ship.yaml` if it exists,
 - identify whether docs or examples changed.
 
 ### 2. Apply `ship-core`

@@ -1,0 +1,42 @@
+version: 1
+base_branch: main
+commands:
+  preflight: python3 -m unittest discover -s tests -p 'test_*.py'
+  docs_sync: null
+  tests: python3 -m unittest discover -s tests -p 'test_*.py'
+  gate: python3 -m compileall .
+  publish_push: git push -u origin HEAD
+  publish_pr: gh pr create --fill
+  publish_release: null
+review:
+  critical_paths:
+    - app/auth/**
+    - app/security/**
+    - .github/workflows/**
+  mechanical_paths:
+    - docs/**
+    - tests/**
+    - "**/*.md"
+  always_review_paths: []
+policy:
+  require_pr: true
+  allow_no_review: true
+  use_cache: true
+  block_on_warnings: false
+docs:
+  paths:
+    - docs/**
+    - "**/*.md"
+scanners:
+  gitleaks:
+    enabled: false
+    required: false
+    command: null
+  semgrep:
+    enabled: false
+    required: false
+    command: null
+  actionlint:
+    enabled: false
+    required: false
+    command: null
