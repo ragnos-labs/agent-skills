@@ -2,43 +2,69 @@
 
 Thanks for contributing.
 
+## Adding a New Skill
+
+Each skill lives in `skills/<skill-name>/SKILL.md`.
+
+Minimum required structure:
+
+```
+skills/
+  your-skill/
+    SKILL.md
+```
+
+Required `SKILL.md` frontmatter:
+
+```yaml
+---
+name: your-skill
+description: One sentence describing when to use this skill.
+---
+```
+
+Once the skill is in place, add an entry to `catalog.json`:
+
+```json
+{
+  "name": "your-skill",
+  "path": "skills/your-skill",
+  "summary": "Short description.",
+  "supported_agents": ["claude-code", "codex"],
+  "status": "active",
+  "featured": false
+}
+```
+
+Optional directories inside a skill folder:
+
+- `references/` — supporting docs, config examples, hook templates
+- `scripts/` — helper scripts the skill may reference
+- `assets/` — images or other static files
+
+Do not add per-skill `README.md` or `CHANGELOG.md` files.
+
 ## Contribution Priorities
 
 We are most likely to accept:
 
-- fixes that make `ship` clearer or more portable,
-- install and onboarding fixes,
-- examples that make the skill easier to adopt,
-- docs that remove private RAGnos assumptions.
+- new skills that solve a real developer workflow problem
+- fixes that make an existing skill clearer or more portable
+- install and onboarding improvements
+- examples that make skills easier to adopt
 
 We are less likely to accept:
 
-- new skill families unrelated to `ship`,
-- private stack assumptions presented as defaults,
-- per-skill `README.md` or `CHANGELOG.md` files,
-- features that only make sense inside RAGnos infrastructure.
-
-## Repo Contract
-
-Each public skill lives in `skills/<skill-name>/`.
-
-Allowed contents:
-
-- `SKILL.md`
-- `scripts/`
-- `references/`
-- `assets/`
-
-Do not add per-skill `README.md` or `CHANGELOG.md` files.
-
-If you add or rename a published skill, update `catalog.json` in the same change.
+- private stack assumptions presented as defaults
+- per-skill `README.md` or `CHANGELOG.md` files
+- features that only make sense inside RAGnos infrastructure
 
 ## How To Propose Changes
 
-1. Open an issue or Discussion first for larger changes.
+1. Open an issue or Discussion first for new skills or larger changes.
 2. Keep the change scoped to one skill or one repo-level concern.
-3. Include install or usage examples when docs change.
-4. Run the local checks before opening a PR.
+3. Include install or usage examples when public behavior changes.
+4. Run local checks before opening a PR.
 
 ## Local Checks
 
@@ -46,14 +72,12 @@ If you add or rename a published skill, update `catalog.json` in the same change
 python3 scripts/validate_catalog.py
 ```
 
-If you change JSON or workflow files, validate those as well before you open a PR.
-
 ## Style
 
-- Use ASCII only.
+- ASCII only.
 - Keep skill docs concise and operational.
 - Prefer extension hooks over repo-specific assumptions.
-- Keep the public baseline useful without private services.
+- Keep skills useful without private services.
 
 ## Pull Requests
 
@@ -62,6 +86,6 @@ PRs should include:
 - what changed,
 - why it belongs here,
 - whether it changes install or release behavior,
-- any follow-up work that should become an issue instead of expanding the PR.
+- any follow-up work that should become a separate issue.
 
 Use the PR template and link the issue or Discussion when applicable.
