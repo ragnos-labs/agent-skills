@@ -1,0 +1,7 @@
+interface:
+  display_name: "Ship for Codex"
+  short_description: "Ship workflow for Codex using shared core semantics"
+  default_prompt: "Use ship-codex and ship-core to review, validate, and publish this branch with the repo's own commands."
+
+policy:
+  allow_implicit_invocation: true

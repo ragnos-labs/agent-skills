@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Support
+    url: https://github.com/ragnos-labs/agent-skills/blob/main/SUPPORT.md
+    about: Read the support guide before opening a new issue.
+  - name: GitHub Discussions
+    url: https://github.com/ragnos-labs/agent-skills/discussions
+    about: Use Discussions for questions, ideas, and show-and-tell posts.

@@ -1,0 +1,38 @@
+name: Skill Request
+description: Request an improvement to the ship family or propose a future public skill
+title: "[Request]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What workflow problem are you trying to solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: What should change in the repo or skill behavior?
+    validations:
+      required: true
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - ship-core
+        - ship-codex
+        - ship-claude
+        - repo-level docs or release workflow
+        - future skill family
+    validations:
+      required: true
+  - type: textarea
+    id: examples
+    attributes:
+      label: Examples or edge cases
+      description: Add links, screenshots, or concrete examples if you have them.
+    validations:
+      required: false

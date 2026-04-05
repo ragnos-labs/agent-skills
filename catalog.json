@@ -1,0 +1,35 @@
+{
+  "skills": [
+    {
+      "name": "ship-core",
+      "path": "skills/ship-core",
+      "summary": "Runtime-neutral ship workflow contract with review, gate, rerun, and publish semantics.",
+      "supported_agents": [
+        "codex",
+        "claude-code"
+      ],
+      "status": "active",
+      "featured": true
+    },
+    {
+      "name": "ship-codex",
+      "path": "skills/ship-codex",
+      "summary": "Codex adapter for ship-core with tool-use and publish guidance.",
+      "supported_agents": [
+        "codex"
+      ],
+      "status": "active",
+      "featured": true
+    },
+    {
+      "name": "ship-claude",
+      "path": "skills/ship-claude",
+      "summary": "Claude Code adapter for ship-core with parallel review and slash-command friendly guidance.",
+      "supported_agents": [
+        "claude-code"
+      ],
+      "status": "active",
+      "featured": true
+    }
+  ]
+}
