@@ -28,7 +28,7 @@ npx skills add ragnos-labs/agent-skills --skill ship
 Pin to a release:
 
 ```bash
-npx skills add ragnos-labs/agent-skills@v0.1.0 --skill ship
+npx skills add ragnos-labs/agent-skills@v0.0.1 --skill ship
 ```
 
 ## Adapting to your repo
