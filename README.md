@@ -19,10 +19,18 @@ What it does:
 
 Works with Claude Code (`/ship`) and Codex.
 
+### [exa-research](skills/exa-research/SKILL.md)
+
+Provides a credential-safe, deterministic JSON search client built on Exa's
+official Python SDK. The bundled installer uses an isolated, hash-locked
+environment and never accepts the API key as a command argument. Installation
+supports macOS and Linux with Python 3.11 or newer.
+
 ## Install
 
 ```bash
 npx skills add ragnos-labs/agent-skills --skill ship
+npx skills add ragnos-labs/agent-skills --skill exa-research
 ```
 
 Pin to a release:
