@@ -1,0 +1,4 @@
+interface:
+  display_name: "Exa Research"
+  short_description: "Search sources with official Exa"
+  default_prompt: "Use $exa-research to research this topic with source-grounded Exa results."

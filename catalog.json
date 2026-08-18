@@ -10,6 +10,17 @@
       ],
       "status": "active",
       "featured": true
+    },
+    {
+      "name": "exa-research",
+      "path": "skills/exa-research",
+      "summary": "Credential-safe Exa search through the official SDK with deterministic JSON output.",
+      "supported_agents": [
+        "codex",
+        "claude-code"
+      ],
+      "status": "active",
+      "featured": false
     }
   ]
 }
