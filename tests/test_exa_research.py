@@ -280,9 +280,9 @@ def test_api_preserves_payload_and_response_and_blocks_unsafe_requests(monkeypat
     assert timeout == 300
     assert "test-secret" not in stdout
 
-    code, _, _ = _run(module, ["api", "/agent/runs", "--method", "GET", "--params", '{"limit":1}'],
+    code, _, _ = _run(module, ["api", "/agent/runs", "--method", "GET", "--params", '{"limit":1,"stream":false}'],
                        environ={"EXA_API_KEY": "test-secret"})
-    assert code == 0 and calls[-1][0].full_url.endswith("/agent/runs?limit=1")
+    assert code == 0 and calls[-1][0].full_url.endswith("/agent/runs?limit=1&stream=false")
     count = len(calls)
     for args in (["https://evil.test/search"], ["//evil.test/search"],
                  ["/search/../api-keys"], ["/search%2f.."], ["/api-keys"],

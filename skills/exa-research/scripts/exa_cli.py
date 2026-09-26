@@ -432,10 +432,13 @@ def _api(args: argparse.Namespace, environ: Mapping[str, str], stdout: Any) -> N
     params = _json_object(args.params)
     if args.method == "GET" and payload is not None:
         raise CliFailure("get_requires_params_not_data", 2)
-    if params is not None and any(
-        not isinstance(v, (str, int, float, bool, list)) for v in params.values()
-    ):
-        raise CliFailure("invalid_query_parameters", 2)
+    if params is not None:
+        for key, value in params.items():
+            items = value if isinstance(value, list) else [value]
+            if any(not isinstance(item, (str, int, float, bool)) for item in items):
+                raise CliFailure("invalid_query_parameters", 2)
+            encoded = [str(item).lower() if isinstance(item, bool) else item for item in items]
+            params[key] = encoded if isinstance(value, list) else encoded[0]
     if payload and payload.get("stream") and not args.stream:
         raise CliFailure("stream_requires_stream_flag", 2)
     url = API_ORIGIN + endpoint
