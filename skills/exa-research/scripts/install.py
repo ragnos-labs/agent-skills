@@ -22,7 +22,7 @@ try:
 except ImportError:  # pragma: no cover - the installer rejects non-POSIX systems
     fcntl = None  # type: ignore[assignment]
 
-CLIENT_VERSION = "0.1.0"
+CLIENT_VERSION = "0.2.0"
 SDK_VERSION = "2.18.1"
 MINIMUM_PYTHON = (3, 11)
 
