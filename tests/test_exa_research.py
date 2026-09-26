@@ -249,3 +249,76 @@ def test_help_and_unexpected_failures_are_deterministic_json(monkeypatch: Any) -
     assert stdout == ""
     assert json.loads(stderr)["code"] == "internal_error"
     assert "private local path" not in stderr
+
+
+def test_api_preserves_payload_and_response_and_blocks_unsafe_requests(monkeypatch: Any) -> None:
+    module = _client_module()
+    calls = []
+
+    class Response(io.BytesIO):
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            self.close()
+
+    class Opener:
+        def open(self, request, timeout):
+            calls.append((request, timeout))
+            return Response(b'{"results":[{"text":"full text","summary":{"topic":"3d"}}]}')
+
+    monkeypatch.setattr(module.urllib.request, "build_opener", lambda handler: Opener())
+    payload = {"query": "Blender", "startPublishedDate": "2026-09-01T00:00:00Z",
+               "category": "github", "contents": {"text": True}, "numResults": 25}
+    code, stdout, stderr = _run(module, ["api", "/search", "--data", json.dumps(payload)],
+                                environ={"EXA_API_KEY": "test-secret"})
+    assert code == 0 and not stderr
+    assert json.loads(stdout)["results"][0]["summary"] == {"topic": "3d"}
+    request, timeout = calls[0]
+    assert request.full_url == "https://api.exa.ai/search"
+    assert json.loads(request.data) == payload
+    assert timeout == 300
+    assert "test-secret" not in stdout
+
+    code, _, _ = _run(module, ["api", "/agent/runs", "--method", "GET", "--params", '{"limit":1,"stream":false}'],
+                       environ={"EXA_API_KEY": "test-secret"})
+    assert code == 0 and calls[-1][0].full_url.endswith("/agent/runs?limit=1&stream=false")
+    count = len(calls)
+    for args in (["https://evil.test/search"], ["//evil.test/search"],
+                 ["/search/../api-keys"], ["/search%2f.."], ["/api-keys"],
+                 ["/search", "--data", "[]"], ["/search", "--data", '{"n":NaN}'],
+                 ["/search", "--timeout", "0"], ["/search", "--method", "GET", "--data", "{}"],
+                 ["/answer", "--data", '{"stream":true}']):
+        code, stdout, stderr = _run(module, ["api", *args], environ={"EXA_API_KEY": "test-secret"})
+        assert code == 2 and not stdout and "test-secret" not in stderr
+    assert len(calls) == count
+    assert module._NoRedirect().redirect_request(None, None, 302, "", {}, "https://evil.test") is None
+
+
+def test_api_file_stdin_stream_and_sanitized_http_error(monkeypatch: Any, tmp_path: Path) -> None:
+    module = _client_module()
+    payload = tmp_path / "request.json"
+    payload.write_text('{"query":"3d"}')
+    assert module._json_object("@" + str(payload)) == {"query": "3d"}
+    monkeypatch.setattr(module.sys, "stdin", io.StringIO('{"query":"3d"}'))
+    assert module._json_object("-") == {"query": "3d"}
+
+    class Opener:
+        def open(self, request, timeout):
+            return io.BytesIO(b'data: {"answer":"3d"}\n\n')
+
+    monkeypatch.setattr(module.urllib.request, "build_opener", lambda handler: Opener())
+    code, stdout, stderr = _run(module, ["api", "/answer", "--stream", "--data", '{"stream":true}'],
+                                environ={"EXA_API_KEY": "test-secret"})
+    assert code == 0 and stdout == 'data: {"answer":"3d"}\n\n' and not stderr
+
+    class FailedOpener:
+        def open(self, request, timeout):
+            raise module.urllib.error.HTTPError(request.full_url, 429, "private response", {}, None)
+
+    monkeypatch.setattr(module.urllib.request, "build_opener", lambda handler: FailedOpener())
+    code, stdout, stderr = _run(module, ["api", "/contents", "--data", "{}"],
+                                environ={"EXA_API_KEY": "test-secret"})
+    assert code == 3 and not stdout
+    assert json.loads(stderr)["code"] == "provider_http_429"
+    assert "private response" not in stderr and "test-secret" not in stderr

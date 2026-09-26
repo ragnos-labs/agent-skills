@@ -10,11 +10,15 @@ import math
 import os
 import re
 import sys
+import urllib.error
+import urllib.parse
+import urllib.request
+from pathlib import Path
 from collections.abc import Callable, Mapping, Sequence
 from typing import Any, Protocol
 
 API_ORIGIN = "https://api.exa.ai"
-CLI_VERSION = "0.1.0"
+CLI_VERSION = "0.2.0"
 SDK_DISTRIBUTION = "exa-py"
 SDK_VERSION = "2.18.1"
 SCHEMA_VERSION = "1.0"
@@ -135,6 +139,13 @@ def _parser() -> JsonArgumentParser:
     search.add_argument("--include-domain", action="append", default=[], type=_domain)
     search.add_argument("--exclude-domain", action="append", default=[], type=_domain)
     search.add_argument("--max-highlight-characters", type=int, default=1200)
+    api = subparsers.add_parser("api", add_help=False)
+    api.add_argument("endpoint")
+    api.add_argument("--method", choices=("GET", "POST", "PATCH", "PUT", "DELETE"), default="POST")
+    api.add_argument("--data", help="JSON object, @file, or - for stdin")
+    api.add_argument("--params", help="JSON query parameters")
+    api.add_argument("--stream", action="store_true")
+    api.add_argument("--timeout", type=int, default=300)
     return parser
 
 
@@ -153,6 +164,13 @@ def _version_document() -> dict[str, Any]:
 
 def _help_document(command: str | None = None) -> dict[str, Any]:
     commands: dict[str, Any] = {
+        "api": {
+            "arguments": ["endpoint"],
+            "options": ["--method", "--data", "--params", "--stream", "--timeout"],
+            "purpose": "full research API JSON or SSE, fixed api.exa.ai origin",
+            "data": "JSON object, @file, or - for stdin; query parameters via --params",
+            "roots": ["search", "contents", "findSimilar", "answer", "research", "agent", "monitors", "batches", "websets"],
+        },
         "doctor": {"network": "not_checked", "purpose": "check local readiness"},
         "search": {
             "arguments": ["query"],
@@ -378,6 +396,81 @@ def _search(
         raise CliFailure("provider_contract_invalid", 3) from exc
 
 
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req: Any, fp: Any, code: int, msg: str,
+                         headers: Any, newurl: str) -> None:
+        # Never forward provider credentials to a redirect destination.
+        return None
+
+
+def _json_object(value: str | None) -> dict[str, Any] | None:
+    if value is None:
+        return None
+    try:
+        raw = sys.stdin.read() if value == "-" else (
+            Path(value[1:]).read_text(encoding="utf-8") if value.startswith("@") else value
+        )
+        document = json.loads(raw)
+        if not isinstance(document, dict):
+            raise ValueError
+        json.dumps(document, allow_nan=False)
+        return document
+    except (OSError, ValueError, UnicodeError) as exc:
+        raise CliFailure("invalid_json_object", 2) from exc
+
+
+def _api(args: argparse.Namespace, environ: Mapping[str, str], stdout: Any) -> None:
+    endpoint = args.endpoint
+    roots = {"search", "contents", "findSimilar", "answer", "research", "agent",
+             "monitors", "batches", "websets"}
+    if (not re.fullmatch(r"/[A-Za-z0-9_/-]+", endpoint)
+            or "//" in endpoint or endpoint.split("/")[1] not in roots):
+        raise CliFailure("invalid_research_endpoint", 2)
+    if not 1 <= args.timeout <= 3600:
+        raise CliFailure("invalid_timeout", 2)
+    payload = _json_object(args.data)
+    params = _json_object(args.params)
+    if args.method == "GET" and payload is not None:
+        raise CliFailure("get_requires_params_not_data", 2)
+    if params is not None:
+        for key, value in params.items():
+            items = value if isinstance(value, list) else [value]
+            if any(not isinstance(item, (str, int, float, bool)) for item in items):
+                raise CliFailure("invalid_query_parameters", 2)
+            encoded = [str(item).lower() if isinstance(item, bool) else item for item in items]
+            params[key] = encoded if isinstance(value, list) else encoded[0]
+    if payload and payload.get("stream") and not args.stream:
+        raise CliFailure("stream_requires_stream_flag", 2)
+    url = API_ORIGIN + endpoint
+    if params:
+        url += "?" + urllib.parse.urlencode(params, doseq=True)
+    request = urllib.request.Request(
+        url, method=args.method,
+        data=json.dumps(payload, allow_nan=False).encode() if payload is not None else None,
+        headers={"x-api-key": _credential(environ), "Content-Type": "application/json",
+                 "User-Agent": USER_AGENT,
+                 "Accept": "text/event-stream" if args.stream else "application/json"},
+    )
+    try:
+        with urllib.request.build_opener(_NoRedirect()).open(request, timeout=args.timeout) as response:
+            if args.stream:
+                for line in response:
+                    stdout.write(line.decode("utf-8"))
+                    stdout.flush()
+            else:
+                raw = response.read()
+                document = json.loads(raw) if raw else {}
+                # Validate before writing so malformed responses cannot produce partial JSON.
+                rendered = json.dumps(document, allow_nan=False, ensure_ascii=False, sort_keys=True)
+                stdout.write(rendered + "\n")
+    except urllib.error.HTTPError as exc:
+        raise CliFailure(f"provider_http_{exc.code}", 3) from exc
+    except (ValueError, UnicodeError) as exc:
+        raise CliFailure("provider_contract_invalid", 3) from exc
+    except (OSError, urllib.error.URLError) as exc:
+        raise CliFailure("provider_unavailable", 3) from exc
+
+
 def main(
     argv: Sequence[str] | None = None,
     *,
@@ -392,6 +485,8 @@ def main(
         _write(_version_document(), stdout)
         return 0
     help_commands = {
+        ("api", "--help"): "api",
+        ("api", "-h"): "api",
         ("--help",): None,
         ("-h",): None,
         ("doctor", "--help"): "doctor",
@@ -404,6 +499,9 @@ def main(
         return 0
     try:
         args = _parser().parse_args(arguments)
+        if args.command == "api":
+            _api(args, values, stdout)
+            return 0
         document = (
             _doctor(values)
             if args.command == "doctor"
