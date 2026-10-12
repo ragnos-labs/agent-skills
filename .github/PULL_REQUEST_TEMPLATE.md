@@ -12,7 +12,10 @@
 ## Validation
 
 - [ ] `python3 scripts/validate_catalog.py`
+- [ ] `python -m pytest -q`
+- [ ] Compile the Python sources listed in CONTRIBUTING.md
 - [ ] `catalog.json` updated if a skill was added or renamed
+- [ ] Requirement locks regenerated and checked if a requirements input changed
 - [ ] Install or usage example reviewed if public behavior changed
 
 ## Notes
